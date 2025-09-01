@@ -141,30 +141,44 @@ export const QRAuthenticator = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl space-y-6">
-        <div className="text-center space-y-2">
-          <h1 className="text-3xl md:text-4xl font-bold text-foreground">QR Code Authenticator</h1>
-          <p className="text-muted-foreground text-sm md:text-base">
-            Verify the authenticity of brand QR codes
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Modern background elements */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5"></div>
+      <div className="absolute top-10 left-10 w-32 h-32 bg-primary/10 rounded-full blur-3xl animate-float"></div>
+      <div className="absolute bottom-10 right-10 w-40 h-40 bg-accent/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '1s' }}></div>
+      
+      <div className="w-full max-w-2xl space-y-8 relative z-10 animate-fade-up">
+        <div className="text-center space-y-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-2xl mb-4 animate-float">
+            <Scan className="w-8 h-8 text-primary" />
+          </div>
+          <h1 className="text-4xl md:text-5xl font-bold text-foreground tracking-tight">
+            QR Authenticator
+          </h1>
+          <p className="text-muted-foreground text-lg md:text-xl font-medium max-w-md mx-auto">
+            Verify the authenticity of brand QR codes with confidence
           </p>
         </div>
 
-        <Card className="border shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-xl">Brand Verification</CardTitle>
+        <Card className="glass-card border-0 modern-shadow">
+          <CardHeader className="pb-6">
+            <CardTitle className="text-2xl font-semibold text-center">Brand Verification</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-8">
             {/* Brand Selection */}
-            <div className="space-y-2">
-              <Label htmlFor="brand-select">Select Brand</Label>
+            <div className="space-y-3">
+              <Label htmlFor="brand-select" className="text-base font-medium">Select Brand</Label>
               <Select onValueChange={setSelectedBrand} value={selectedBrand}>
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full h-12 border-2 hover:border-primary/50 transition-all duration-200">
                   <SelectValue placeholder="Choose a brand to verify" />
                 </SelectTrigger>
-                <SelectContent className="bg-popover border shadow-lg">
+                <SelectContent className="glass-card border-0 shadow-2xl">
                   {brands.map((brand) => (
-                    <SelectItem key={brand.name} value={brand.name}>
+                    <SelectItem 
+                      key={brand.name} 
+                      value={brand.name}
+                      className="hover:bg-primary/10 transition-colors duration-200"
+                    >
                       {brand.name}
                     </SelectItem>
                   ))}
@@ -174,24 +188,24 @@ export const QRAuthenticator = () => {
 
             {/* QR Code Preview */}
             {(imagePreview || qrPreview) && (
-              <div className="space-y-2">
-                <Label>QR Code Preview</Label>
-                <div className="border rounded-lg p-4 bg-muted/50">
+              <div className="space-y-3 animate-fade-up">
+                <Label className="text-base font-medium">QR Code Preview</Label>
+                <div className="glass-card border-2 border-dashed border-primary/30 rounded-xl p-6">
                   {imagePreview ? (
                     <div className="text-center">
                       <img 
                         src={imagePreview} 
                         alt="Uploaded QR code" 
-                        className="max-w-full max-h-48 mx-auto rounded-lg border"
+                        className="max-w-full max-h-52 mx-auto rounded-xl shadow-lg"
                       />
-                      <p className="text-sm text-muted-foreground mt-2">Uploaded QR Code</p>
+                      <p className="text-sm text-muted-foreground mt-3 font-medium">Uploaded QR Code</p>
                     </div>
                   ) : qrPreview ? (
                     <div className="text-center">
-                      <div className="inline-flex items-center justify-center w-24 h-24 bg-primary/10 rounded-lg border-2 border-dashed border-primary">
-                        <Scan className="w-8 h-8 text-primary" />
+                      <div className="inline-flex items-center justify-center w-28 h-28 bg-primary/15 rounded-2xl border-2 border-dashed border-primary/50 animate-pulse">
+                        <Scan className="w-10 h-10 text-primary" />
                       </div>
-                      <p className="text-sm text-muted-foreground mt-2">
+                      <p className="text-sm text-muted-foreground mt-3 font-medium">
                         {qrPreview.type === 'camera' ? 'Scanned with Camera' : 'QR Code Detected'}
                       </p>
                     </div>
@@ -205,18 +219,18 @@ export const QRAuthenticator = () => {
               <Button
                 onClick={isScanning ? stopScanning : startWebcamScan}
                 variant="outline"
-                className="w-full"
+                className="w-full h-14 text-base font-medium border-2 hover:border-primary/50 hover:bg-primary/5 transition-all duration-200"
               >
-                <Camera className="w-4 h-4 mr-2" />
+                <Camera className="w-5 h-5 mr-3" />
                 {isScanning ? 'Stop Camera' : 'Scan with Camera'}
               </Button>
               
               <Button
                 onClick={() => fileInputRef.current?.click()}
                 variant="outline"
-                className="w-full"
+                className="w-full h-14 text-base font-medium border-2 hover:border-primary/50 hover:bg-primary/5 transition-all duration-200"
               >
-                <Upload className="w-4 h-4 mr-2" />
+                <Upload className="w-5 h-5 mr-3" />
                 Upload QR Image
               </Button>
             </div>
@@ -231,15 +245,15 @@ export const QRAuthenticator = () => {
 
             {/* Camera Preview */}
             {isScanning && (
-              <div className="relative">
+              <div className="relative animate-fade-up">
                 <video
                   ref={videoRef}
-                  className="w-full max-w-sm mx-auto rounded-lg border"
+                  className="w-full max-w-sm mx-auto rounded-xl border-2 border-primary/30 shadow-lg"
                   playsInline
                 />
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="border-2 border-primary border-dashed rounded-lg w-48 h-48 flex items-center justify-center">
-                    <Scan className="w-8 h-8 text-primary animate-pulse" />
+                  <div className="border-2 border-primary border-dashed rounded-xl w-48 h-48 flex items-center justify-center bg-black/10 backdrop-blur-sm">
+                    <Scan className="w-10 h-10 text-primary animate-pulse" />
                   </div>
                 </div>
               </div>
@@ -248,9 +262,10 @@ export const QRAuthenticator = () => {
             {/* Check Button */}
             <Button
               onClick={checkAuthenticity}
-              className="w-full"
+              className="w-full h-14 text-base font-semibold gradient-primary hover:shadow-lg transition-all duration-300 disabled:opacity-50"
               disabled={!selectedBrand || !inputUrl}
             >
+              <CheckCircle className="w-5 h-5 mr-3" />
               Check Authenticity
             </Button>
             
@@ -265,7 +280,7 @@ export const QRAuthenticator = () => {
                   setAuthResult(null);
                 }}
                 variant="outline"
-                className="w-full"
+                className="w-full h-12 font-medium hover:bg-muted/50 transition-all duration-200"
               >
                 Clear QR Code
               </Button>
@@ -275,16 +290,26 @@ export const QRAuthenticator = () => {
 
         {/* Results */}
         {authResult && (
-          <Card className={`border-2 ${authResult.isValid ? 'border-success bg-success/5' : 'border-destructive bg-destructive/5'}`}>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-center space-x-3">
-                {authResult.isValid ? (
-                  <CheckCircle className="w-8 h-8 text-success" />
-                ) : (
-                  <XCircle className="w-8 h-8 text-destructive" />
-                )}
+          <Card className={`glass-card border-0 modern-shadow animate-fade-up ${
+            authResult.isValid 
+              ? 'bg-success/5 border-success/20' 
+              : 'bg-destructive/5 border-destructive/20'
+          }`}>
+            <CardContent className="pt-8 pb-8">
+              <div className="flex items-center justify-center space-x-4">
+                <div className={`p-3 rounded-full ${
+                  authResult.isValid ? 'bg-success/20' : 'bg-destructive/20'
+                }`}>
+                  {authResult.isValid ? (
+                    <CheckCircle className="w-8 h-8 text-success" />
+                  ) : (
+                    <XCircle className="w-8 h-8 text-destructive" />
+                  )}
+                </div>
                 <div className="text-center">
-                  <h3 className={`text-xl font-bold ${authResult.isValid ? 'text-success' : 'text-destructive'}`}>
+                  <h3 className={`text-2xl font-bold ${
+                    authResult.isValid ? 'text-success' : 'text-destructive'
+                  }`}>
                     {authResult.isValid ? 'Authenticated' : 'Unauthenticated / fake product'}
                   </h3>
                 </div>

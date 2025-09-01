@@ -18,6 +18,9 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				'inter': ['Inter', 'system-ui', 'sans-serif'],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -73,6 +76,20 @@ export default {
 				sm: 'calc(var(--radius) - 4px)'
 			},
 			keyframes: {
+				'float': {
+					'0%, 100%': { transform: 'translateY(0px)' },
+					'50%': { transform: 'translateY(-10px)' }
+				},
+				'fade-up': {
+					'from': {
+						opacity: '0',
+						transform: 'translateY(30px)'
+					},
+					'to': {
+						opacity: '1',
+						transform: 'translateY(0)'
+					}
+				},
 				'accordion-down': {
 					from: {
 						height: '0'
@@ -91,6 +108,8 @@ export default {
 				}
 			},
 			animation: {
+				'float': 'float 3s ease-in-out infinite',
+				'fade-up': 'fade-up 0.6s ease-out',
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out'
 			}
