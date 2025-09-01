@@ -26,6 +26,8 @@ export const QRAuthenticator = () => {
   const [scanResult, setScanResult] = useState(null);
   const [isScanning, setIsScanning] = useState(false);
   const [authResult, setAuthResult] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [qrPreview, setQrPreview] = useState(null);
   const videoRef = useRef(null);
   const qrScannerRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -41,7 +43,7 @@ export const QRAuthenticator = () => {
 
   const checkAuthenticity = () => {
     if (!selectedBrand || !inputUrl) {
-      alert('Please select a brand and enter/scan a URL');
+      alert('Please select a brand and scan/upload a QR code');
       return;
     }
 
@@ -81,6 +83,8 @@ export const QRAuthenticator = () => {
           (result) => {
             setInputUrl(result.data);
             setScanResult(result.data);
+            setQrPreview({ type: 'camera', data: result.data });
+            setImagePreview(null);
             stopScanning();
           },
           {
@@ -117,13 +121,22 @@ export const QRAuthenticator = () => {
     const file = event.target.files[0];
     if (!file) return;
 
+    // Create image preview
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setImagePreview(e.target.result);
+    };
+    reader.readAsDataURL(file);
+
     try {
       const result = await QrScanner.scanImage(file);
       setInputUrl(result);
       setScanResult(result);
+      setQrPreview({ type: 'upload', data: result });
     } catch (error) {
       console.error('Error scanning QR code from image:', error);
       alert('Could not detect QR code in the uploaded image');
+      setImagePreview(null);
     }
   };
 
@@ -159,18 +172,33 @@ export const QRAuthenticator = () => {
               </Select>
             </div>
 
-            {/* URL Input */}
-            <div className="space-y-2">
-              <Label htmlFor="url-input">URL from QR Code</Label>
-              <Input
-                id="url-input"
-                type="text"
-                placeholder="Paste URL or scan QR code"
-                value={inputUrl}
-                onChange={(e) => setInputUrl(e.target.value)}
-                className="w-full"
-              />
-            </div>
+            {/* QR Code Preview */}
+            {(imagePreview || qrPreview) && (
+              <div className="space-y-2">
+                <Label>QR Code Preview</Label>
+                <div className="border rounded-lg p-4 bg-muted/50">
+                  {imagePreview ? (
+                    <div className="text-center">
+                      <img 
+                        src={imagePreview} 
+                        alt="Uploaded QR code" 
+                        className="max-w-full max-h-48 mx-auto rounded-lg border"
+                      />
+                      <p className="text-sm text-muted-foreground mt-2">Uploaded QR Code</p>
+                    </div>
+                  ) : qrPreview ? (
+                    <div className="text-center">
+                      <div className="inline-flex items-center justify-center w-24 h-24 bg-primary/10 rounded-lg border-2 border-dashed border-primary">
+                        <Scan className="w-8 h-8 text-primary" />
+                      </div>
+                      <p className="text-sm text-muted-foreground mt-2">
+                        {qrPreview.type === 'camera' ? 'Scanned with Camera' : 'QR Code Detected'}
+                      </p>
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+            )}
 
             {/* QR Scanning Options */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -225,6 +253,23 @@ export const QRAuthenticator = () => {
             >
               Check Authenticity
             </Button>
+            
+            {/* Clear Button */}
+            {(imagePreview || qrPreview || inputUrl) && (
+              <Button
+                onClick={() => {
+                  setImagePreview(null);
+                  setQrPreview(null);
+                  setInputUrl('');
+                  setScanResult(null);
+                  setAuthResult(null);
+                }}
+                variant="outline"
+                className="w-full"
+              >
+                Clear QR Code
+              </Button>
+            )}
           </CardContent>
         </Card>
 
