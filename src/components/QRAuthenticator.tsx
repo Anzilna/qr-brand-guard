@@ -285,17 +285,8 @@ export const QRAuthenticator = () => {
                 )}
                 <div className="text-center">
                   <h3 className={`text-xl font-bold ${authResult.isValid ? 'text-success' : 'text-destructive'}`}>
-                    {authResult.message}
+                    {authResult.isValid ? 'Authenticated' : 'Unauthenticated / fake product'}
                   </h3>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Brand: {authResult.brand}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    Expected: {authResult.expectedDomain}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    Actual: {authResult.actualDomain}
-                  </p>
                 </div>
               </div>
             </CardContent>
