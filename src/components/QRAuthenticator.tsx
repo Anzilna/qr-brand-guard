@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Camera, Upload, CheckCircle, XCircle, Scan } from 'lucide-react';
+import { Camera, Upload, CheckCircle, XCircle, Scan, Loader2 } from 'lucide-react'; // Add Loader2 for spinner
 import QrScanner from 'qr-scanner';
 
 const brands = [
@@ -28,6 +28,7 @@ export const QRAuthenticator = () => {
   const [authResult, setAuthResult] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [qrPreview, setQrPreview] = useState(null);
+  const [loading, setLoading] = useState(false); // Add loading state
   const videoRef = useRef(null);
   const qrScannerRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -41,28 +42,36 @@ export const QRAuthenticator = () => {
     }
   };
 
-  const checkAuthenticity = () => {
+  const checkAuthenticity = async () => {
     if (!selectedBrand || !inputUrl) {
       alert('Please select a brand and scan/upload a QR code');
       return;
     }
+
+    setLoading(true); // Set loading to true
+    setAuthResult(null);
 
     const brand = brands.find(b => b.name === selectedBrand);
     const urlDomain = extractDomain(inputUrl);
 
     if (!urlDomain) {
       setAuthResult({ isValid: false, message: 'Invalid URL format' });
+      setLoading(false); // Set loading to false
       return;
     }
 
-    const isAuthentic = urlDomain === brand.domain;
-    setAuthResult({
-      isValid: isAuthentic,
-      message: isAuthentic ? 'Authenticated' : 'Unauthenticated',
-      brand: brand.name,
-      expectedDomain: brand.domain,
-      actualDomain: urlDomain
-    });
+    // Simulate a delay for the loading spinner (e.g., API call)
+    setTimeout(() => {
+      const isAuthentic = urlDomain === brand.domain;
+      setAuthResult({
+        isValid: isAuthentic,
+        message: isAuthentic ? 'Authenticated' : 'Unauthenticated',
+        brand: brand.name,
+        expectedDomain: brand.domain,
+        actualDomain: urlDomain
+      });
+      setLoading(false); // Set loading to false
+    }, 2000); // 2-second delay
   };
 
   const startWebcamScan = async () => {
@@ -219,7 +228,7 @@ export const QRAuthenticator = () => {
               <Button
                 onClick={isScanning ? stopScanning : startWebcamScan}
                 variant="outline"
-                className="w-full h-14 text-base font-medium border-2 hover:border-primary/50 hover:bg-primary/5 transition-all duration-200"
+                className="w-full h-14 text-base font-medium border-2 hover:border-primary/50 hover:bg-blue-600 transition-all duration-200"
               >
                 <Camera className="w-5 h-5 mr-3" />
                 {isScanning ? 'Stop Camera' : 'Scan with Camera'}
@@ -228,7 +237,7 @@ export const QRAuthenticator = () => {
               <Button
                 onClick={() => fileInputRef.current?.click()}
                 variant="outline"
-                className="w-full h-14 text-base font-medium border-2 hover:border-primary/50 hover:bg-primary/5 transition-all duration-200"
+                className="w-full h-14 text-base font-medium border-2 hover:border-primary/50 hover:bg-blue-600 transition-all duration-200"
               >
                 <Upload className="w-5 h-5 mr-3" />
                 Upload QR Image
@@ -259,14 +268,50 @@ export const QRAuthenticator = () => {
               </div>
             )}
 
+            {/* Authentication Status Block */}
+            {authResult && (
+              <div className="animate-fade-up">
+                <Card className={`glass-card border-0 modern-shadow ${
+                  authResult.isValid 
+                    ? 'bg-success/5 border-success/20' 
+                    : 'bg-destructive/5 border-destructive/20'
+                }`}>
+                  <CardContent className="pt-8 pb-8">
+                    <div className="flex items-center justify-center space-x-4">
+                      <div className={`p-3 rounded-full ${
+                        authResult.isValid ? 'bg-success/20' : 'bg-destructive/20'
+                      }`}>
+                        {authResult.isValid ? (
+                          <CheckCircle className="w-8 h-8 text-success" />
+                        ) : (
+                          <XCircle className="w-8 h-8 text-destructive" />
+                        )}
+                      </div>
+                      <div className="text-center">
+                        <h3 className={`text-2xl font-bold ${
+                          authResult.isValid ? 'text-success' : 'text-destructive'
+                        }`}>
+                          {authResult.isValid ? 'Authenticated' : 'Unauthenticated'}
+                        </h3>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
             {/* Check Button */}
             <Button
               onClick={checkAuthenticity}
               className="w-full h-14 text-base font-semibold gradient-primary hover:shadow-lg transition-all duration-300 disabled:opacity-50"
-              disabled={!selectedBrand || !inputUrl}
+              disabled={!selectedBrand || !inputUrl || loading} // Disable button when loading
             >
-              <CheckCircle className="w-5 h-5 mr-3" />
-              Check Authenticity
+              {loading ? (
+                <Loader2 className="w-5 h-5 mr-3 animate-spin" /> // Show spinner when loading
+              ) : (
+                <CheckCircle className="w-5 h-5 mr-3" />
+              )}
+              {loading ? 'Checking...' : 'Check Authenticity'}
             </Button>
             
             {/* Clear Button */}
@@ -287,36 +332,6 @@ export const QRAuthenticator = () => {
             )}
           </CardContent>
         </Card>
-
-        {/* Results */}
-        {authResult && (
-          <Card className={`glass-card border-0 modern-shadow animate-fade-up ${
-            authResult.isValid 
-              ? 'bg-success/5 border-success/20' 
-              : 'bg-destructive/5 border-destructive/20'
-          }`}>
-            <CardContent className="pt-8 pb-8">
-              <div className="flex items-center justify-center space-x-4">
-                <div className={`p-3 rounded-full ${
-                  authResult.isValid ? 'bg-success/20' : 'bg-destructive/20'
-                }`}>
-                  {authResult.isValid ? (
-                    <CheckCircle className="w-8 h-8 text-success" />
-                  ) : (
-                    <XCircle className="w-8 h-8 text-destructive" />
-                  )}
-                </div>
-                <div className="text-center">
-                  <h3 className={`text-2xl font-bold ${
-                    authResult.isValid ? 'text-success' : 'text-destructive'
-                  }`}>
-                    {authResult.isValid ? 'Authenticated' : 'Unauthenticated / fake product'}
-                  </h3>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
       </div>
     </div>
   );
